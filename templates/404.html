@@ -1,0 +1,25 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}404{% endblock %}
+{% block styles %}
+    {{super()}}
+        <!-- Google font -->
+        <link href="https://fonts.googleapis.com/css?family=Josefin+Sans:400,700" rel="stylesheet">
+        <!-- Custom stlylesheet -->
+        <link type="text/css" rel="stylesheet" href="static/css/style.css" />
+{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block content %}
+    <div id="notfound">
+        <div class="notfound">
+            <div class="notfound-404">
+                <h1>4<span>0</span>4</h1>
+            </div>
+            <br>
+            <p>Es posible que la página que está buscando se haya eliminado si se cambió el nombre o no está disponible temporalmente.</p>
+            <a href="/">página principal</a>
+        </div>
+    </div>
+{% endblock %}
