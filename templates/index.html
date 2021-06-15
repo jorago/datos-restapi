@@ -1,60 +1,82 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}This is an example page{% endblock %}
+{% block title %}Carga masiva de datos{% endblock %}
 
 {% block navbar %}
 <div class="container navbar navbar-fixed-top">
-    <nav class="navbar navbar-default">
+    <!-- <nav class="navbar navbar-default">
         <div class="container">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/">
                     <span class="glyphicon glyphicon-home" aria-hidden="true">
                     </span>
-                    <span class="mx-2">
-                        App para subir archivos en lote
-                    </span>
                 </a>
             </div>
         </div>
-    </nav>
+    </nav> -->
 </div>
 {% endblock %}
 
 {% block content %}
 <div class="container">
+    <br>
+    <div class="jumbotron center-block">
+        <h1>Subir archivos en lote</h1>
 
-<h1>Subir archivos en lote</h1>
-
-    <p class="help-block">Aplicación que permite carga masiva de datos</p>
-    
-    <form action="/cargar" method="POST">
-        <div class="form-group">
-            <label for="exampleInputFile">Selecciona el archivo a enviar</label>
-            <input class="align-center" type="file" name="archivo">
-        </div>
-        <button type="submit" class="btn btn-success">Enviar</button>
-    </form>
-
+        <p class="help-block">Aplicación que permite la carga masiva de datos</p>
+        
+        <form action="/cargar" method="POST">
+            <div class="form-group">
+                <label for="exampleInputFile">Selecciona el archivo a enviar</label>
+                <input type="file" name="archivo" accept=".xlsx,.xls,.mxltx,.xltm" required onchange="validar()" >
+            </div>
+            <button type="submit" class="btn btn-success" id="enviar" disabled >Enviar</button>
+        </form>
+    </div>
 <hr>
+
+{% if listado is not defined or listado|length <= 0 %}
+    <div class="alert alert-danger" role="alert">No existen datos para mostrar...</div>
+{% else %}
 <table class="table table-stripeed table-hover">
-    <thead class="bg-primary">
-        <th>Nombre</th>
-        <th>Apellido</th>
-        <th>Nacionalidad</th>
-        <th>Fecha Contrato</th>
-        <th>Sexo</th>
+    <thead>
+        <th colspan="6" class="text-right">
+            Cantidad de Registros <span class="badge">{{ listado|length }}</span>
+        </th>
     </thead>
-    <tbody>
-        {% for row in listado %}
-        <tr>
-            <td>{{ row.1 }}</td>
-            <td>{{ row.2}}</td>
-            <td>{{ row.3}}</td>
-            <td>{{ row.4}}</td>
-            <td>{{ row.5}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <thead class="bg-primary">
+            <th>N°</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Nacionalidad</th>
+            <th>Fecha Contrato</th>
+            <th>Sexo</th>
+        </thead>
+        <tbody>
+            {% for row in listado %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ row.1|upper }}</td>
+                <td>{{ row.2|upper }}</td>
+                <td>{{ row.3|upper }}</td>
+                <td>{{ row.4|upper }}</td>
+                <td>{{ row.5|upper }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
 </div>
 
+<script type="text/javascript">
+    function validar() {
+            // Obtener nombre de archivo
+            let archivo = document.getElementsByName('archivo').value;
+            
+            if(archivo !== ''){
+                let boton = document.getElementById("enviar");
+                console.log(boton)
+                boton.disabled = false
+            }
+    }
+</script>
 {% endblock %}
