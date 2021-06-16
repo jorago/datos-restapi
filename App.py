@@ -2,8 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from openpyxl import load_workbook
 from flask_bootstrap import Bootstrap
+from werkzeug.utils import secure_filename
 import os
-
+from os import path
+from flask_wtf import CsrfProtect
 UPLOAD_FOLDER = os.path.abspath("./tmp/")
 
 app = Flask(__name__)
@@ -12,9 +14,10 @@ app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'bd_cargadatos'
+csrf = CsrfProtect(app)
 Bootstrap(app)
 mysql = MySQL(app)
-
+    
 # Settings
 app.secret_key= 'mysecretkey'
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -27,7 +30,8 @@ def allowed_file(filename):
 
 @app.route('/')
 def Index():    
-    return render_template('index.html', listado = obtenerDatos())
+    data = obtenerDatos()
+    return render_template('index.html', listado = data)
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -39,14 +43,16 @@ def Cargar():
         #carga de archivo
         nombre_archivo = request.files['archivo']        
         # nombre_archivo = request.form['archivo']
+        # filename = secure_filename(nombre_archivo.filename)
         filename = nombre_archivo.filename
         nombre_archivo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         #Se valida el formato de archivo permitido
-        if nombre_archivo.filename and allowed_file(nombre_archivo.filename):
+        if nombre_archivo.filename and allowed_file(filename):
 
-            wb = load_workbook(filename, read_only=True)
+            wb = load_workbook(app.config["UPLOAD_FOLDER"]+'\\'+nombre_archivo.filename, read_only=True)
 
+            # cursor = mysql.connection.cursor()                    
             #Hojas del libro
             sheets = wb.sheetnames
             for sheet in sheets:
@@ -57,17 +63,9 @@ def Cargar():
                     cols = wb[sheet].max_column
                     #Obtener la cantidad de Filas
                     rows = wb[sheet].max_row
-                    #Recorrer cada fila y obtener los datos de cada column
-                    for row in range(2, rows+1):
-                        nombre= sheetActive.cell(row,1).value
-                        apellido= sheetActive.cell(row,2).value
-                        nacionalidad= sheetActive.cell(row,3).value
-                        fechaContrato = sheetActive.cell(row,4).value
-                        sexo = sheetActive.cell(row,5).value
-                        # Insertar en la base de datos cada registro
-                        cursor = mysql.connection.cursor()                    
-                        cursor.execute('INSERT INTO datos(nombre, apellido, nacionalidad, fechaContrato, sexo) values(%s,%s,%s,%s,%s)', (nombre, apellido, nacionalidad, fechaContrato, sexo))
-                        mysql.connection.commit()
+                    #Recorrer cada fila y obtener los datos de cada column                    
+                    for nombre, apellido, nacionalidad, fechaContrato, sexo in sheetActive.iter_rows(min_row=2):
+                        insertarDatos(nombre.value, apellido.value, nacionalidad.value, fechaContrato.value, sexo.value)                    
                     flash('La carga del archivo se ha ejecutado correctamente')
 
                 else:
@@ -78,10 +76,17 @@ def Cargar():
             flash('Error al intentar cargar el archivo, extensión no permitida')
         return redirect(url_for('Index'))
 
+def insertarDatos(nombre, apellido, nacionalidad, fechaContrato, sexo):
+    cursor = mysql.connection.cursor()     
+    query = '''INSERT INTO datos(nombre, apellido, nacionalidad, fechaContrato, sexo) values(%s,%s,%s,%s,%s)'''
+    values = (nombre, apellido, nacionalidad, fechaContrato, sexo)                   
+    cursor.execute(query, values)
+    cursor.close()
+    mysql.connection.commit()
 
 def obtenerDatos():
     cursor =  mysql.connection.cursor()
-    cursor.execute("SELECT * FROM datos")
+    cursor.execute('''SELECT * FROM datos''')
     data = cursor.fetchall()
     return data
 

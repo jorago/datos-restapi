@@ -54,8 +54,9 @@
         <p class="help-block">Aplicación que permite la carga masiva de datos</p>
         
         <form action="/cargar" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <div class="form-group">
-                <label for="exampleInputFile">Selecciona el archivo a enviar</label>
+                <label for="archivo">Selecciona el archivo a enviar</label>
                 <input type="file" name="archivo" accept=".xlsx,.xls,.mxltx,.xltm" required onchange="validar()" >
             </div>
             <div>
@@ -65,7 +66,7 @@
             
         </form>
     </div>
-    <div class="loader text-center" id="loader" style="display: none;"></div>
+    <div class="loader flex justify-center" id="loader" style="display: none;"></div>
     
 <hr>
 {% with messages = get_flashed_messages() %}
@@ -88,7 +89,7 @@
 {% if listado is not defined or listado|length <= 0 %}
     <div class="alert alert-danger" role="alert">No existen datos para mostrar...</div>
 {% else %}
-<table class="table table-striped table-condensed table-hover pointer">
+<table class="table table-responsive table-striped table-condensed table-hover pointer">
     <thead >
         <th colspan="6" class="text-right">
             Cantidad de Registros <span class="badge">{{ listado|length }}</span>
@@ -132,6 +133,6 @@
     function loading(){
         let mostrar = document.getElementById("loader");
         mostrar.style = 'display:inline-block'
-    }
+    }    
 </script>
 {% endblock %}
