@@ -53,7 +53,7 @@
 
         <p class="help-block">Aplicación que permite la carga masiva de datos</p>
         
-        <form action="/cargar" method="POST">
+        <form action="/cargar" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="exampleInputFile">Selecciona el archivo a enviar</label>
                 <input type="file" name="archivo" accept=".xlsx,.xls,.mxltx,.xltm" required onchange="validar()" >

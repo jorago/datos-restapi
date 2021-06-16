@@ -16,6 +16,11 @@ mysql = MySQL(app)
 # Settings
 app.secret_key= 'mysecretkey'
 
+ALLOWED_EXTENSIONS = set(["xlsx","xls","mxltx","xltm"])
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1] in ALLOWED_EXTENSIONS
+
 @app.route('/')
 def Index():    
     return render_template('index.html', listado = obtenerDatos())
@@ -28,35 +33,45 @@ def page_not_found(error):
 def Cargar():
     if request.method == 'POST':   
         #carga de archivo
-        nombre_archivo = request.form['archivo']
-        wb = load_workbook(nombre_archivo, read_only=True)
+        nombre_archivo = request.files['archivo']        
+        # nombre_archivo = request.form['archivo']
 
-        #Hojas del libro
-        sheets = wb.sheetnames
-        for sheet in sheets:
-            #Hoja activa
-            sheetActive = wb[sheet]
-            if sheet in wb.sheetnames and wb[sheet].max_column == 5 and wb[sheet].max_row > 0:                
-                #Obtener la cantidad de Columnas
-                cols = wb[sheet].max_column
-                #Obtener la cantidad de Filas
-                rows = wb[sheet].max_row
-                #Recorrer cada fila y obtener los datos de cada column
-                for row in range(2, rows+1):
-                    nombre= sheetActive.cell(row,1).value
-                    apellido= sheetActive.cell(row,2).value
-                    nacionalidad= sheetActive.cell(row,3).value
-                    fechaContrato = sheetActive.cell(row,4).value
-                    sexo = sheetActive.cell(row,5).value
-                    # Insertar en la base de datos cada registro
-                    cursor = mysql.connection.cursor()                    
-                    cursor.execute('INSERT INTO datos(nombre, apellido, nacionalidad, fechaContrato, sexo) values(%s,%s,%s,%s,%s)', (nombre, apellido, nacionalidad, fechaContrato, sexo))
-                    mysql.connection.commit()
-                flash('La carga del archivo se ha ejecutado correctamente')
+        #Se valida el formato de archivo permitido
+        if nombre_archivo.filename and allowed_file(nombre_archivo.filename):
 
-            else:
-                flash('Error al intentar cargar el archivo, está mal formado o no contiene información')
+            wb = load_workbook(nombre_archivo, read_only=True)
+
+            #Hojas del libro
+            sheets = wb.sheetnames
+            for sheet in sheets:
+                #Hoja activa
+                sheetActive = wb[sheet]
+                if sheet in wb.sheetnames and wb[sheet].max_column == 5 and wb[sheet].max_row > 0:                
+                    #Obtener la cantidad de Columnas
+                    cols = wb[sheet].max_column
+                    #Obtener la cantidad de Filas
+                    rows = wb[sheet].max_row
+                    #Recorrer cada fila y obtener los datos de cada column
+                    for row in range(2, rows+1):
+                        nombre= sheetActive.cell(row,1).value
+                        apellido= sheetActive.cell(row,2).value
+                        nacionalidad= sheetActive.cell(row,3).value
+                        fechaContrato = sheetActive.cell(row,4).value
+                        sexo = sheetActive.cell(row,5).value
+                        # Insertar en la base de datos cada registro
+                        cursor = mysql.connection.cursor()                    
+                        cursor.execute('INSERT INTO datos(nombre, apellido, nacionalidad, fechaContrato, sexo) values(%s,%s,%s,%s,%s)', (nombre, apellido, nacionalidad, fechaContrato, sexo))
+                        mysql.connection.commit()
+                    flash('La carga del archivo se ha ejecutado correctamente')
+
+                else:
+                    flash('Error al intentar cargar el archivo, está mal formado o no contiene información')
+
+            return redirect(url_for('Index'))
+        else:
+            flash('Error al intentar cargar el archivo, extensión no permitida')
         return redirect(url_for('Index'))
+
 
 def obtenerDatos():
     cursor =  mysql.connection.cursor()
