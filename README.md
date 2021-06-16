@@ -1,6 +1,8 @@
 # datos-restapi
 RestAPI para la carga masiva de datos, desarrollado en Python - micro framework flask
 
+Si desea ver la aplicación corriendo en un servidor de prueba ingresa a: http://jorago.pythonanywhere.com/
+
 Esta app utiliza los siguientes paquetes:
 - Flask_mysqldb https://flask-mysqldb.readthedocs.io/en/latest/
 - Openpyxl https://openpyxl.readthedocs.io/en/stable/
@@ -21,3 +23,4 @@ Se utilizó Mysql como manejador de base de datos:
         `sexo` varchar(20) NOT NULL,
         PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+      
