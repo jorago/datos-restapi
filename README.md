@@ -6,9 +6,8 @@ Esta app utiliza los siguientes paquetes:
 - Openpyxl https://openpyxl.readthedocs.io/en/stable/
 - Flask_bootstrap https://pythonhosted.org/Flask-Bootstrap/
 
-Se utilizó Mysql como manejador de base de datos 
-    - Nombre de la base de datos: bd_cargadatos
-  
+Se utilizó Mysql como manejador de base de datos:
+    - Nombre de la base de datos: bd_cargadatos  
     - Ejecutar script para crear la base de datos: 
         CREATE DATABASE `bd_cargadatos` /*!40100 DEFAULT CHARACTER SET utf8mb4 */
 
