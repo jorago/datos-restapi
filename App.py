@@ -2,10 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from openpyxl import load_workbook
 from flask_bootstrap import Bootstrap
-from werkzeug.utils import secure_filename
 import os
-from os import path
 from flask_wtf import CsrfProtect
+
 UPLOAD_FOLDER = os.path.abspath("./tmp/")
 
 app = Flask(__name__)
@@ -43,31 +42,21 @@ def Cargar():
         #carga de archivo
         nombre_archivo = request.files['archivo']        
         # nombre_archivo = request.form['archivo']
-        # filename = secure_filename(nombre_archivo.filename)
         filename = nombre_archivo.filename
-        nombre_archivo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-
         #Se valida el formato de archivo permitido
         if nombre_archivo.filename and allowed_file(filename):
-
-            wb = load_workbook(app.config["UPLOAD_FOLDER"]+'\\'+nombre_archivo.filename, read_only=True)
-
-            # cursor = mysql.connection.cursor()                    
+            wb = load_workbook(nombre_archivo, read_only=True)
             #Hojas del libro
             sheets = wb.sheetnames
             for sheet in sheets:
                 #Hoja activa
                 sheetActive = wb[sheet]
                 if sheet in wb.sheetnames and wb[sheet].max_column == 5 and wb[sheet].max_row > 0:                
-                    #Obtener la cantidad de Columnas
-                    cols = wb[sheet].max_column
-                    #Obtener la cantidad de Filas
-                    rows = wb[sheet].max_row
                     #Recorrer cada fila y obtener los datos de cada column                    
                     for nombre, apellido, nacionalidad, fechaContrato, sexo in sheetActive.iter_rows(min_row=2):
+                        # Llamado a la funcion que agrega los registros a la base de datos
                         insertarDatos(nombre.value, apellido.value, nacionalidad.value, fechaContrato.value, sexo.value)                    
                     flash('La carga del archivo se ha ejecutado correctamente')
-
                 else:
                     flash('Error al intentar cargar el archivo, está mal formado o no contiene información')
 
