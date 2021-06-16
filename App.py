@@ -2,7 +2,9 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL
 from openpyxl import load_workbook
 from flask_bootstrap import Bootstrap
+import os
 
+UPLOAD_FOLDER = os.path.abspath("./tmp/")
 
 app = Flask(__name__)
 # Mysql Connection
@@ -15,8 +17,10 @@ mysql = MySQL(app)
 
 # Settings
 app.secret_key= 'mysecretkey'
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 ALLOWED_EXTENSIONS = set(["xlsx","xls","mxltx","xltm"])
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in ALLOWED_EXTENSIONS
@@ -35,11 +39,13 @@ def Cargar():
         #carga de archivo
         nombre_archivo = request.files['archivo']        
         # nombre_archivo = request.form['archivo']
+        filename = nombre_archivo.filename
+        nombre_archivo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         #Se valida el formato de archivo permitido
         if nombre_archivo.filename and allowed_file(nombre_archivo.filename):
 
-            wb = load_workbook(nombre_archivo, read_only=True)
+            wb = load_workbook(filename, read_only=True)
 
             #Hojas del libro
             sheets = wb.sheetnames
