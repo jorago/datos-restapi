@@ -29,7 +29,7 @@ def Cargar():
     if request.method == 'POST':   
         #carga de archivo
         nombre_archivo = request.form['archivo']
-        wb = load_workbook(nombre_archivo)
+        wb = load_workbook(nombre_archivo, read_only=True)
 
         #Hojas del libro
         sheets = wb.sheetnames
